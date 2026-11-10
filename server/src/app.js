@@ -5,6 +5,7 @@ import authRoutes from './routes/auth.js';
 import listingRoutes from './routes/listings.js';
 import userRoutes from './routes/users.js';
 import reviewRoutes from './routes/reviews.js';
+import helmet from 'helmet';
 
 const app = express();
 
@@ -12,8 +13,21 @@ app.use(morgan('dev'));
 app.use(cors({ origin: 'http://localhost:5175', credentials: false }));
 app.use(express.json());
 
+// 1. ADD HELMET HERE (Before the routes)
+app.use(helmet.contentSecurityPolicy({
+  useDefaults: true,
+  directives: {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'self'"], // Explicitly omits 'unsafe-inline'
+    imgSrc: ["'self'", "data:", "http:", "https:"], 
+    objectSrc: ["'none'"],
+    upgradeInsecureRequests: [],
+  },
+}));
+
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
+// 2. ROUTES
 app.use('/api/auth', authRoutes);
 app.use('/api/listings', listingRoutes);
 app.use('/api/users', userRoutes);
